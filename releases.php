@@ -8,9 +8,10 @@ select
 	t1.gid as id,
 	t1.name,
 	t1.length,
+	t2.number,
 	t4.gid as release,
 	t4.name as release_name,
-	t9.name as country,
+	t9.name as area,
 	coalesce(t6.date_year, t7.date_year) as year,
 	coalesce(t6.date_month, t7.date_month) as month,
 	coalesce(t6.date_day, t7.date_day) as day
@@ -28,55 +29,52 @@ order by
 	coalesce(t6.date_year, t7.date_year),
 	coalesce(t6.date_month, t7.date_month),
 	coalesce(t6.date_day, t7.date_day),
+	t9.name,
 	t4.gid,
-	t2.number
+	t3.position,
+	t2.position
 asc nulls last
 ";
 
 $res = pg_query_params($conn, $sql, array($album));
-$recordings = pg_fetch_all($res);
+$releases = array();
 
-function int_or_null($val) {
-	if ($val == null) {
-		return null;
-	} else {
-		return (int) $val;
-	}
-}
-
-$releases_tmp = array();
-$extras = array();
-
-foreach ($recordings as $recording) {
-	$release = $recording['release'];
-	if (!array_key_exists($release, $releases_tmp)) {
-		$releases_tmp[$release] = array();
-	}
-	if (!array_key_exists($release, $extras)) {
-		$extras[$release] = array(
-			"name" => $recording['release_name'],
-			"country" => $recording['country']
+while (($recording = pg_fetch_object($res)) !== false) {
+	if (!array_key_exists($recording->release, $releases)) {
+		$releases[$recording->release] = array(
+			'id' => $recording->release,
+			'name' => $recording->release_name,
+			'year' => $recording->year,
+			'month' => $recording->month,
+			'day' => $recording->day,
+			'areas' => array(),
+			'recordings' => array(),
 		);
 	}
-	$releases_tmp[$release][] = array(
-		"id" => $recording['id'],
-		"name" => $recording['name'],
-		"length" => int_or_null($recording['length']),
-		"year" => int_or_null($recording['year']),
-		"month" => int_or_null($recording['month']),
-		"day" => int_or_null($recording['day'])
-	);
+	$release = &$releases[$recording->release];
+
+	// add country if it isn't already there
+	if (!in_array($recording->area, $release['areas'])) {
+		$release['areas'][] = $recording->area;
+	}
+
+	// add recording if it isn't already there
+	if (!array_key_exists($recording->id, $release['recordings'])) {
+		$release['recordings'][$recording->id] = array(
+			'id' => $recording->id,
+			'name' => $recording->name,
+			'length' => $recording->length,
+		);
+	}
 }
 
-$releases = array();
-foreach ($releases_tmp as $key => $val) {
-	$releases[] = array(
-		"id" => $key,
-		"name" => $extras[$key]['name'],
-		"country" => $extras[$key]['country'],
-		"recordings" => $val
-	);
+$releases = array_values($releases);
+foreach ($releases as &$val) {
+	$val['recordings'] = array_values($val['recordings']);
 }
+
+pg_free_result($res);
+pg_close($conn);
 
 header("Content-Type: application/json");
 echo json_encode($releases);
