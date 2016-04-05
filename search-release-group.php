@@ -5,13 +5,14 @@ $query = $_GET['query'];
 
 $sql = "
 select
-    gid as id,
-    name,
-    comment
-from artist
+	t1.gid as id,
+	t1.name,
+	t2.name artist
+from release_group t1
+    inner join artist_credit t2 on t2.id = t1.artist_credit
 where
-    name ilike $1
-order by char_length(name) asc
+    t1.name ilike $1
+order by char_length(t1.name) asc
 limit 25
 ";
 
