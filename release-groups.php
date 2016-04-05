@@ -1,8 +1,6 @@
 <?php
 include('common.php');
 
-$artist = $_GET['artist'];
-
 $sql = "
 select
 	t4.gid as id,
@@ -30,7 +28,7 @@ where
 order by year, month, day asc nulls last
 ";
 
-$res = pg_query_params($conn, $sql, array($artist));
+$res = pg_query_params($conn, $sql, array($_GET['artist']));
 $releaseGroups = array();
 
 while (($entry = pg_fetch_object($res)) !== false) {

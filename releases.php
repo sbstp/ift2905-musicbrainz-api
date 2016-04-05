@@ -1,8 +1,6 @@
 <?php
 include('common.php');
 
-$album = $_GET['release-group'];
-
 $sql = "
 select
 	t1.gid as id,
@@ -36,7 +34,7 @@ order by
 asc nulls last
 ";
 
-$res = pg_query_params($conn, $sql, array($album));
+$res = pg_query_params($conn, $sql, array($_GET['release-group']));
 $releases = array();
 
 while (($recording = pg_fetch_object($res)) !== false) {
