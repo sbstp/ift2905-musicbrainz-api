@@ -5,6 +5,9 @@ $query = $_GET['query'];
 
 $res = pg_query_params($conn, "select gid as id, name, comment from artist where name ilike $1 limit 10", array("%$query%"));
 $artists = pg_fetch_all($res);
+if ($artists === false) {
+    $artists = array();
+}
 
 $query_len = strlen($query);
 
