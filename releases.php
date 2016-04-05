@@ -1,7 +1,7 @@
 <?php
 include('common.php');
 
-$album = $_GET['album'];
+$album = $_GET['release-group'];
 
 $sql = "
 select
