@@ -33,7 +33,11 @@ $res = pg_query_params($conn, $sql, array($artist));
 $albums = pg_fetch_all($res);
 
 foreach ($albums as &$album) {
-	$album['secondary_types'] = explode(',', $album['secondary_types']);
+	$sectypes = array();
+	if (!empty($album['secondary_types'])) {
+		$sectypes = explode(',', $album['secondary_types']);
+	}
+	$album['secondary_types'] = $sectypes;
 }
 
 header("Content-Type: application/json");
