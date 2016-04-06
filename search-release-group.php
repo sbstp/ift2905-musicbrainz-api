@@ -12,7 +12,9 @@ select * from (
 			select json_build_object('id', t3.gid, 'name', t3.name, 'comment', t3.comment)
 			from artist t3
 			inner join artist_credit_name t4 on t4.artist = t3.id
-			inner join artist_credit t5 on t5.id = t4.artist_credit and t5.id = t1.artist_credit
+			inner join artist_credit t5 on t5.id = t4.artist_credit
+			where t5.id = t1.artist_credit
+			order by t4.position asc
 		)) as credits
 	from release_group t1
 		inner join release t2 on t2.release_group = t1.id
