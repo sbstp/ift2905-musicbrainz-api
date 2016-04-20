@@ -52,7 +52,7 @@ while (($recording = pg_fetch_object($res)) !== false) {
 	$release = &$releases[$recording->release];
 
 	// add country if it isn't already there
-	if (!in_array($recording->area, $release['areas'])) {
+	if (!is_null($recording->area) && !in_array($recording->area, $release['areas'])) {
 		$release['areas'][] = $recording->area;
 	}
 
